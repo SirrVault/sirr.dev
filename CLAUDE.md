@@ -54,6 +54,31 @@ npm run format    # Prettier
 - MDX content is English-only; UI strings (nav, labels, metadata) are translated via JSON
 - Arabic (ar) is RTL — handled via `dir` attribute on `<html>` and useEffect in LocaleProvider
 
+## Deployment
+
+Deployed to **Dokploy** at `162.55.226.118` via multi-stage Dockerfile build.
+
+- **Domain**: `sirr.dev`
+- **Build type**: `dockerfile` (Dokploy pulls from GitHub, builds inside Docker)
+- **Application ID**: `i2ODrkSp8NUt3ZopmQ-OO`
+
+### Version endpoint
+
+```
+GET /api/version
+→ { "name": "sirr.dev", "version": "1.0.202602221430-041ede9", "sha": "041ede9" }
+```
+
+Version format: `1.0.YYYYMMDDHHmm-<short sha>`. Baked at build time via `next.config.mjs`.
+
+### Deploy
+
+```bash
+ssh luntik@162.55.226.118 'source ~/.env && docker run --rm --network dokploy-network alpine/curl -s \
+  --max-time 60 -X POST -H "Content-Type: application/json" -H "x-api-key: $DOKPLAY_KEY" \
+  -d "{\"applicationId\": \"i2ODrkSp8NUt3ZopmQ-OO\"}" http://dokploy:3000/api/application.deploy'
+```
+
 ## Pre-Commit Checklist
 
 Before every commit and push, review and update if needed:

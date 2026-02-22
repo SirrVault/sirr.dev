@@ -69,6 +69,15 @@ Translations live in `src/i18n/translations/*.json`. To add a language:
 
 Supported: English, Chinese, Spanish, Arabic (RTL), French, German, Japanese, Portuguese, Korean, Russian.
 
+## Deployment
+
+Deployed via [Dokploy](https://dokploy.com) using a multi-stage Dockerfile. Dokploy pulls from GitHub and builds inside Docker — same environment every time.
+
+```
+GET https://sirr.dev/api/version
+→ { "name": "sirr.dev", "version": "1.0.202602221430-041ede9", "sha": "041ede9" }
+```
+
 ## Related
 
 - [SirrVault/sirr](https://github.com/SirrVault/sirr) — Server + CLI + MCP

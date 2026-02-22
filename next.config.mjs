@@ -9,7 +9,8 @@ import withSearch from './src/mdx/search.mjs'
 const git = (...args) => { try { return execFileSync('git', args).toString().trim() } catch { return null } }
 
 const buildSha = process.env.BUILD_SHA || git('rev-parse', '--short', 'HEAD') || 'unknown'
-const buildNumber = process.env.BUILD_NUMBER || git('rev-list', '--count', 'HEAD') || 'unknown'
+const buildTime = new Date().toISOString().replace(/[-T:]/g, '').slice(0, 12)
+const buildVersion = `1.0.${buildTime}-${buildSha}`
 
 const withMDX = nextMDX({
   options: {
@@ -28,7 +29,7 @@ const nextConfig = {
   },
   env: {
     BUILD_SHA: buildSha,
-    BUILD_NUMBER: buildNumber,
+    BUILD_VERSION: buildVersion,
   },
 }
 
