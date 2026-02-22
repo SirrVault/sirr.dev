@@ -13,7 +13,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG BUILD_SHA=unknown
+ARG BUILD_NUMBER=unknown
 ENV BUILD_SHA=$BUILD_SHA
+ENV BUILD_NUMBER=$BUILD_NUMBER
 RUN npm run build
 
 # --- Production ---
