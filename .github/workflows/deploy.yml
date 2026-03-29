@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE: ghcr.io/sirrvault/sirr.dev
+  IMAGE: ghcr.io/sirrlock/sirr.dev
 
 jobs:
   build:
