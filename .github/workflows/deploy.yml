@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: 10930
+          username: luntik
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/services/sirr/code-sirr
+            git pull origin main
+            cd ..
+            docker compose up -d --build --remove-orphans
