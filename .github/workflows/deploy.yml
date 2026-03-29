@@ -4,19 +4,43 @@ on:
   push:
     branches: [main]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE: ghcr.io/sirrvault/sirr.dev
+
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ env.IMAGE }}:latest,${{ env.IMAGE }}:${{ github.sha }}
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           port: 10930
           username: luntik
           key: ${{ secrets.SSH_KEY }}
+          envs: GHCR_PAT
           script: |
-            cd ~/services/sirr/code-sirr
-            git pull origin main
-            cd ..
-            docker compose up -d --build --remove-orphans
+            echo "$GHCR_PAT" | docker login ghcr.io -u github-actions --password-stdin
+            cd ~/services/sirr
+            docker compose pull
+            docker compose up -d --remove-orphans
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
