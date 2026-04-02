@@ -67,89 +67,49 @@ sirrd serve
 
 ## Push your first secret
 
-Push a public dead drop with a 1-hour TTL and a single-read limit. Once read, it is gone.
+Push a public dead drop. Once read, it is gone.
 
 <CodeGroup>
 
 ```bash {{ title: 'CLI' }}
-sirr push "postgres://user:pass@db:5432/myapp" \
-  --reads 1 \
-  --ttl 1h
-# → id:  a3f8...7c2d
-# → url: https://sirr.sirrlock.com/s/a3f8...7c2d
+sirr push "postgres://user:pass@db:5432/myapp"
+# → {"id":"a3f8...7c2d","url":"http://localhost:39999/secrets/a3f8...7c2d"}
 ```
 
 ```bash {{ title: 'cURL' }}
 curl -X POST http://localhost:39999/secrets \
-  -H "Authorization: Bearer $SIRR_MASTER_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{
-    "value": "postgres://user:pass@db:5432/myapp",
-    "max_reads": 1,
-    "ttl_seconds": 3600
-  }'
-# → {"id": "a3f8...7c2d", "url": "https://sirr.sirrlock.com/s/a3f8...7c2d"}
+  -d '{"value": "postgres://user:pass@db:5432/myapp"}'
+# → {"id":"a3f8...7c2d","url":"http://localhost:39999/secrets/a3f8...7c2d"}
 ```
 
 </CodeGroup>
+
+The response returns the secret `id` and a `url` you can share. Add `--reads 1 --ttl 1h` to limit to a single read with a 1-hour expiry.
 
 ## Retrieve a secret
 
-Reading the secret decrements the read counter. With `max_reads: 1` this is the only read — the secret destroys itself immediately after.
+Use the `id` from the push response to read the secret back. The value prints to stdout.
 
-<CodeGroup>
-
-```bash {{ title: 'CLI' }}
+```bash
 sirr get a3f8...7c2d
+# → postgres://user:pass@db:5432/myapp
 ```
 
-```bash {{ title: 'cURL' }}
-curl http://localhost:39999/secrets/a3f8...7c2d \
-  -H "Authorization: Bearer $SIRR_MASTER_API_KEY"
-```
-
-</CodeGroup>
-
-Try reading it again — you will get `404 Not Found`. The vault already burned it.
+If you pushed with `--reads 1`, try reading it again — you will get a `404`. The vault already burned it.
 
 ## Connect MCP to your local instance
 
-Install the Sirr MCP server so Claude (or any MCP-compatible AI tool) can push and pull secrets directly from your local Sirr instance during a conversation.
+Add the Sirr MCP server so Claude can push and pull secrets from your local instance.
 
-```bash {{ title: 'Install MCP server' }}
-npm install -g @sirrlock/mcp
+```bash {{ title: 'Add MCP server' }}
+claude mcp add --transport stdio \
+  --env SIRR_SERVER=http://localhost:39999 \
+  --env SIRR_TOKEN=$SIRR_MASTER_API_KEY \
+  sirr -- npx -y @sirrlock/mcp
 ```
 
-Add a `.mcp.json` in your project root (or home directory):
-
-```json {{ title: '.mcp.json' }}
-{
-  "mcpServers": {
-    "sirr": {
-      "command": "sirr-mcp",
-      "env": {
-        "SIRR_SERVER": "http://localhost:39999",
-        "SIRR_TOKEN": "<your-SIRR_MASTER_API_KEY>"
-      }
-    }
-  }
-}
-```
-
-Verify the connection:
-
-```bash {{ title: 'Health check' }}
-SIRR_SERVER=http://localhost:39999 \
-SIRR_TOKEN=$SIRR_MASTER_API_KEY \
-sirr-mcp --health
-# → OK
-```
-
-Now Claude can use `push_secret` and `get_secret` tools. Secrets pushed through MCP obey the same TTL and read-limit rules — a secret with `max_reads: 1` burns after Claude reads it, even across sessions.
-
-<Note>
-  The MCP server uses your master key directly. For shared or team environments, create a scoped API key with only the permissions you need. See [API Keys](/api-keys).
-</Note>
+That is it. Claude can now use `store_secret` and `read_secret` tools directly in conversation.
 
 ## What is next
 

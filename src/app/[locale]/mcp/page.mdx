@@ -36,7 +36,7 @@ Sirr's MCP server exposes a suite of tools that map to the core Sirr operations.
 One-liner for Claude Code:
 
 ```bash {{ title: 'Claude Code' }}
-claude mcp add sirr -- npx -y @sirrlock/mcp
+claude mcp add --transport stdio sirr -- npx -y @sirrlock/mcp
 ```
 
 Or install globally via npm:
@@ -58,7 +58,7 @@ Add Sirr to your MCP configuration file. Most AI tools look for `.mcp.json` in y
 If you use [Sirr Cloud](https://sirrlock.com), no `SIRR_SERVER` is needed — the MCP server defaults to `https://sirr.sirrlock.com`. Use your principal key as the token.
 
 ```bash {{ title: 'Claude Code — Sirr Cloud' }}
-claude mcp add sirr -e SIRR_TOKEN=your-principal-key -e SIRR_ORG=your-org-id -- npx -y @sirrlock/mcp
+claude mcp add --transport stdio --env SIRR_TOKEN=your-principal-key --env SIRR_ORG=your-org-id sirr -- npx -y @sirrlock/mcp
 ```
 
 ```json {{ title: '.mcp.json — Sirr Cloud' }}
@@ -81,7 +81,7 @@ claude mcp add sirr -e SIRR_TOKEN=your-principal-key -e SIRR_ORG=your-org-id -- 
 If you run your own `sirrd` instance, set `SIRR_SERVER` to your server's address and use the master API key as the token.
 
 ```bash {{ title: 'Claude Code — Self-Hosted' }}
-claude mcp add sirr -e SIRR_SERVER=http://localhost:39999 -e SIRR_TOKEN=your-master-api-key -- npx -y @sirrlock/mcp
+claude mcp add --transport stdio --env SIRR_SERVER=http://localhost:39999 --env SIRR_TOKEN=your-master-api-key sirr -- npx -y @sirrlock/mcp
 ```
 
 ```json {{ title: '.mcp.json — Self-Hosted' }}
